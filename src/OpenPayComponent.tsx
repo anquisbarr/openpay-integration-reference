@@ -1,58 +1,36 @@
 import type React from "react";
-import { useEffect, useState } from "react";
-import { env } from "./env";
+import { z } from "zod";
 
-const OpenPayComponent: React.FC = () => {
-	const [deviceSessionId, setDeviceSessionId] = useState("");
-	const [tokenId, setTokenId] = useState("");
+interface OpenPayComponentProps {
+	deviceSessionId: string;
+	setTokenId: React.Dispatch<React.SetStateAction<string>>;
+}
 
-	useEffect(() => {
-		const loadScript = (src: string): Promise<void> => {
-			return new Promise((resolve, reject) => {
-				const script = document.createElement("script");
-				script.src = src;
-				script.onload = () => resolve();
-				script.onerror = () =>
-					reject(new Error(`Script load error for ${src}`));
-				document.body.appendChild(script);
-			});
-		};
+const cardFormData = z.object({
+	card_number: z.string(),
+	holder_name: z.string(),
+	expiration_year: z.string(),
+	expiration_month: z.string(),
+	cvv2: z.string(),
+});
 
-		const initializeOpenPay = async () => {
-			try {
-				await loadScript("https://js.openpay.pe/openpay.v1.min.js");
-				await loadScript("https://js.openpay.pe/openpay-data.v1.min.js");
-
-				window.OpenPay.setId(env.VITE_OPENPAY_MERCHANT_ID);
-				window.OpenPay.setApiKey(env.VITE_OPENPAY_PUBLIC_KEY);
-				window.OpenPay.setSandboxMode(true);
-
-				const sessionId = window.OpenPay.deviceData.setup(
-					"formularioPago_1",
-					"deviceIdHiddenFieldName",
-				);
-				setDeviceSessionId(sessionId);
-			} catch (error) {
-				console.error("Error al inicializar OpenPay:", error);
-			}
-		};
-
-		initializeOpenPay();
-	}, []);
-
+const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
+	deviceSessionId,
+	setTokenId,
+}) => {
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-		console.log("Formulario enviado");
 
 		const formData = new FormData(event.currentTarget);
+		const formDataObj = Object.fromEntries(formData.entries());
+		const cardData = cardFormData.safeParse(formDataObj);
 
-		const cardData = {
-			card_number: formData.get("cardNumber")?.toString() || "",
-			holder_name: formData.get("cardholderName")?.toString() || "",
-			expiration_year: formData.get("expirationYear")?.toString() || "",
-			expiration_month: formData.get("expirationMonth")?.toString() || "",
-			cvv2: formData.get("cvv")?.toString() || "",
-		};
+		if (!cardData.success) {
+			console.error("Invalid card data:", cardData.error);
+			return;
+		}
+
+		console.log("Card data:", cardData.data);
 
 		if (!window.OpenPay) {
 			console.error("OpenPay is not defined");
@@ -60,7 +38,7 @@ const OpenPayComponent: React.FC = () => {
 		}
 
 		window.OpenPay.token.create(
-			cardData,
+			cardData.data,
 			(response) => {
 				console.log("Token created:", response.data);
 				setTokenId(response.data.id);
@@ -71,40 +49,33 @@ const OpenPayComponent: React.FC = () => {
 		);
 	};
 
-	useEffect(() => {
-		// Ensure that the token ID is set once is being updated after the form submission
-		if (tokenId) {
-			console.log("Token ID:", tokenId);
-		}
-	}, [tokenId]);
-
 	return (
 		<div>
 			<h2>Formulario de Pago</h2>
 			<form id="formularioPago_1" onSubmit={handleSubmit}>
 				<label>
 					Nombre en la tarjeta:
-					<input type="text" name="cardholderName" required />
+					<input type="text" name="holder_name" required />
 				</label>
 				<br />
 				<label>
 					Número de tarjeta:
-					<input type="text" name="cardNumber" required />
+					<input type="text" name="card_number" required />
 				</label>
 				<br />
 				<label>
 					CVV:
-					<input type="text" name="cvv" required />
+					<input type="text" name="cvv2" required />
 				</label>
 				<br />
 				<label>
 					Mes de expiración:
-					<input type="text" name="expirationMonth" required />
+					<input type="text" name="expiration_month" required />
 				</label>
 				<br />
 				<label>
 					Año de expiración:
-					<input type="text" name="expirationYear" required />
+					<input type="text" name="expiration_year" required />
 				</label>
 				<br />
 				<input

@@ -1,42 +1,47 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { env } from "./env";
 
 interface OpenPayWrapperProps {
-	onLoad: () => void;
+	setDeviceSessionId: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const OpenPayWrapper: React.FC<OpenPayWrapperProps> = ({ onLoad }) => {
-	const [loaded, setLoaded] = useState(false);
-
+const OpenPayWrapper: React.FC<OpenPayWrapperProps> = ({
+	setDeviceSessionId,
+}) => {
 	useEffect(() => {
-		const loadScripts = async () => {
-			const script1 = document.createElement("script");
-			script1.src = "https://js.openpay.pe/openpay.v1.min.js";
-			script1.async = true;
-			script1.onload = () => {
-				const script2 = document.createElement("script");
-				script2.src = "https://js.openpay.pe/openpay-data.v1.min.js";
-				script2.async = true;
-				script2.onload = () => {
-					setLoaded(true);
-					onLoad();
-				};
-				document.body.appendChild(script2);
-			};
-			document.body.appendChild(script1);
+		const loadScript = (src: string): Promise<void> => {
+			return new Promise((resolve, reject) => {
+				const script = document.createElement("script");
+				script.src = src;
+				script.onload = () => resolve();
+				script.onerror = () =>
+					reject(new Error(`Script load error for ${src}`));
+				document.body.appendChild(script);
+			});
 		};
 
-		if (!window.OpenPay) {
-			loadScripts();
-		} else {
-			setLoaded(true);
-			onLoad();
-		}
-	}, [onLoad]);
+		const initializeOpenPay = async () => {
+			try {
+				await loadScript("https://js.openpay.pe/openpay.v1.min.js");
+				await loadScript("https://js.openpay.pe/openpay-data.v1.min.js");
 
-	if (!loaded) {
-		return <div>Loading payment gateway...</div>;
-	}
+				window.OpenPay.setId(env.VITE_OPENPAY_MERCHANT_ID);
+				window.OpenPay.setApiKey(env.VITE_OPENPAY_PUBLIC_KEY);
+				window.OpenPay.setSandboxMode(true);
+
+				const sessionId = window.OpenPay.deviceData.setup(
+					"payment-form",
+					"deviceIdHiddenFieldName",
+				);
+				setDeviceSessionId(sessionId);
+			} catch (error) {
+				console.error("Error initializing OpenPay:", error);
+			}
+		};
+
+		initializeOpenPay();
+	}, [setDeviceSessionId]);
 
 	return null;
 };

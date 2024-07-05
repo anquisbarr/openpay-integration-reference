@@ -1,8 +1,7 @@
-import type { Jsonp, OpenPay } from "openpay";
+import type openpay from "openpay";
 
 declare global {
 	interface Window {
-		OpenPay: OpenPay;
-		$jsonp: Jsonp;
+		OpenPay: typeof openpay;
 	}
 }

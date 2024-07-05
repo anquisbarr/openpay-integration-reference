@@ -32,14 +32,17 @@ declare module "openpay" {
 		state: string;
 	}
 
-	interface Token {
+	interface TokenData {
 		id: string;
 		card: Card;
 		creation_date: string;
 	}
 
-	type SuccessCallback<T> = (response: T) => void;
+	interface Token {
+		data: TokenData;
+	}
 
+	type SuccessCallback<T> = (response: T) => void;
 	type ErrorCallback = (error: OpenPayError) => void;
 
 	interface JsonpOptions<TData = unknown, TError = unknown> {
@@ -100,6 +103,6 @@ declare module "openpay" {
 		};
 	}
 
-	export const openpay: OpenPay;
+	const openpay: OpenPay;
 	export default openpay;
 }

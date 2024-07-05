@@ -1,6 +1,6 @@
 import type React from "react";
 import "./App.css";
-import OpenPayComponent from "./OpenPayComponent"; // Ensure the import path is correct
+import OpenPayComponent from "./OpenPayComponent";
 
 const App: React.FC = () => {
 	return (

@@ -1,30 +1,3 @@
-# React + TypeScript + Vite
+# OpenPay Peru Integration Guide
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
-
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+This repository serves as a comprehensive guide for integrating OpenPay services within Peruvian markets. It is designed to facilitate developers by providing a custom wrapper component that simplifies the process of dynamically loading OpenPay scripts on the client side. To enhance the development experience further, the repository includes module declarations for OpenPay functionalities, alongside detailed TypeScript definitions for various types. This initiative aims to streamline the integration process, ensuring a smoother development workflow when incorporating OpenPay's payment solutions into your projects. Currently, this project is a work in progress (WIP), with ongoing efforts to expand and refine the resources available.

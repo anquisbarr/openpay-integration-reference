@@ -1,7 +1,7 @@
-import type openpay from "openpay";
+import type { OpenPay } from "openpay";
 
 declare global {
 	interface Window {
-		OpenPay: typeof openpay;
+		OpenPay: OpenPay;
 	}
 }

@@ -1,3 +1,4 @@
+import type { Card, OpenPayError, Token } from "openpay";
 import type React from "react";
 import { z } from "zod";
 
@@ -12,6 +13,17 @@ const cardFormData = z.object({
 	expiration_year: z.string(),
 	expiration_month: z.string(),
 	cvv2: z.string(),
+	address: z.optional(
+		z.object({
+			city: z.string(),
+			country_code: z.string(),
+			postal_code: z.string(),
+			line1: z.string(),
+			line2: z.optional(z.string()),
+			line3: z.optional(z.string()),
+			state: z.string(),
+		}),
+	),
 });
 
 const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
@@ -38,12 +50,12 @@ const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
 		}
 
 		window.OpenPay.token.create(
-			cardData.data,
-			(response) => {
+			cardData.data as Card,
+			(response: Token) => {
 				console.log("Token created:", response.data);
 				setTokenId(response.data.id);
 			},
-			(error) => {
+			(error: OpenPayError) => {
 				console.error("Token creation error:", error);
 			},
 		);

@@ -1,11 +1,9 @@
 import type { Card, OpenPayError, Token } from "openpay";
 import type React from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
-
-interface OpenPayComponentProps {
-	deviceSessionId: string;
-	setTokenId: React.Dispatch<React.SetStateAction<string>>;
-}
+import { env } from "./env";
+import useOpenPay from "./hooks/useOpenPay";
 
 const cardFormData = z.object({
 	card_number: z.string(),
@@ -26,10 +24,14 @@ const cardFormData = z.object({
 	),
 });
 
-const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
-	deviceSessionId,
-	setTokenId,
-}) => {
+const OpenPayComponent = () => {
+	const { deviceSessionId } = useOpenPay(
+		env.VITE_OPENPAY_MERCHANT_ID,
+		env.VITE_OPENPAY_PUBLIC_KEY,
+		true,
+	);
+	const [tokenId, setTokenId] = useState<string | null>(null);
+
 	const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 
@@ -41,8 +43,6 @@ const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
 			console.error("Invalid card data:", cardData.error);
 			return;
 		}
-
-		console.log("Card data:", cardData.data);
 
 		if (!window.OpenPay) {
 			console.error("OpenPay is not defined");
@@ -60,6 +60,12 @@ const OpenPayComponent: React.FC<OpenPayComponentProps> = ({
 			},
 		);
 	};
+
+	useEffect(() => {
+		if (tokenId) {
+			console.log("Token ID:", tokenId);
+		}
+	}, [tokenId]);
 
 	return (
 		<div>
